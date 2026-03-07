@@ -86,7 +86,7 @@ class DashboardScreen(Screen):
         if table.row_count == 0:
             return None
         row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
-        return str(row_key)
+        return row_key.value
 
     def action_add_connection(self) -> None:
         def on_result(conn) -> None:
@@ -104,6 +104,7 @@ class DashboardScreen(Screen):
             return
         conn = self.app.config_manager.get_connection(conn_id)
         if not conn:
+            self.notify("Connection not found", severity="error")
             return
 
         def on_result(updated) -> None:
@@ -121,6 +122,7 @@ class DashboardScreen(Screen):
             return
         conn = self.app.config_manager.get_connection(conn_id)
         if not conn:
+            self.notify("Connection not found", severity="error")
             return
 
         def on_confirm(confirmed: bool) -> None:
@@ -141,6 +143,7 @@ class DashboardScreen(Screen):
             return
         conn = self.app.config_manager.get_connection(conn_id)
         if not conn:
+            self.notify("Connection not found", severity="error")
             return
 
         password = None
@@ -170,6 +173,7 @@ class DashboardScreen(Screen):
             return
         conn = self.app.config_manager.get_connection(conn_id)
         if not conn:
+            self.notify("Connection not found", severity="error")
             return
 
         if not self.app.ssh_manager.is_connected(conn.id):
