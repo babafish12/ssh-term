@@ -5,7 +5,6 @@ from __future__ import annotations
 from textual.app import ComposeResult
 from textual.screen import Screen
 from textual.widgets import Static
-from textual.containers import Vertical
 from textual.binding import Binding
 
 from ssh_term import theme
@@ -68,8 +67,7 @@ class DashboardScreen(Screen):
 
     def compose(self) -> ComposeResult:
         yield Static("SSH Terminal Manager", id="title-bar")
-        with Vertical():
-            yield ConnectionTable(id="conn-table")
+        yield ConnectionTable(id="conn-table")
         yield HintBar()
 
     def on_mount(self) -> None:
