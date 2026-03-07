@@ -15,10 +15,13 @@ class ConnectionTable(DataTable):
     }
     """
 
+    can_focus = True
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.cursor_type = "row"
         self.zebra_stripes = True
+        self.show_cursor = True
 
     def on_mount(self) -> None:
         self.add_columns("Name", "IP", "User", "Port", "Auth", "Tags", "Last Connected")
