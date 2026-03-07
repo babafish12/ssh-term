@@ -5,58 +5,105 @@ A minimalistic TUI application for managing and connecting to SSH servers, built
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+---
+
 ## Features
 
 - **Connection Management** — Add, edit, and delete SSH connections with a clean dashboard UI
-- **Interactive SSH Terminal** — Full terminal emulation powered by pyte with 256-color support
-- **Dual-Pane File Transfer** — Browse local and remote filesystems side-by-side, copy files via SFTP
-- **Encrypted Storage** — Master password with bcrypt hashing, SSH passwords encrypted with Fernet (PBKDF2-derived key)
+- **Interactive Terminal** — Full terminal emulation with 256-color support (pyte)
+- **File Transfer** — Dual-pane browser for local and remote filesystems via SFTP
+- **Encrypted Storage** — Master password (bcrypt), SSH passwords encrypted with Fernet (PBKDF2)
 - **Tokyo Night Theme** — Dark color scheme inspired by the Tokyo Night palette
-- **Multiple Auth Methods** — SSH key, password, or SSH agent authentication
+- **Multiple Auth Methods** — SSH key, password, or SSH agent
+
+---
+
+## Prerequisites
+
+- Python 3.11+
+- pip
 
 ## Installation
 
 ```bash
-git clone https://github.com/vube/ssh-term.git
+git clone <repo-url>
 cd ssh-term
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
 
-## Usage
+---
+
+## Quick Start
 
 ```bash
 ssh-term
 ```
 
-On first launch, you'll be prompted to set a master password. This password encrypts any stored SSH passwords and is required on each startup.
+### 1. Set a Master Password
 
-### Dashboard Keybindings
+On first launch you'll be prompted to create a master password. This password encrypts all stored SSH passwords and is required on every startup.
 
-| Key     | Action              |
-|---------|---------------------|
-| `a`     | Add connection      |
-| `e`     | Edit connection     |
-| `d`     | Delete connection   |
-| `Enter` | Connect (SSH)       |
-| `f`     | File transfer       |
-| `q`     | Quit                |
+### 2. Add a Connection
 
-### Terminal Keybindings
+Press `a` on the dashboard to add a new connection. The following fields are available:
 
-| Key      | Action                |
-|----------|-----------------------|
-| `Ctrl+D` | Disconnect            |
-| `Ctrl+F` | Open file transfer    |
+| Field            | Description                                    |
+|------------------|------------------------------------------------|
+| Name             | Display name (e.g. "Prod Server")              |
+| IP               | Hostname or IP address                         |
+| Port             | SSH port (default: 22)                         |
+| Username         | SSH username                                   |
+| Auth Method      | `SSH Key`, `Password`, or `SSH Agent`          |
+| Private Key Path | Path to private key (default: `~/.ssh/id_ed25519`) |
+| Password         | SSH password (stored encrypted)                |
+| Tags             | Comma-separated tags (e.g. "prod, web")        |
 
-### File Transfer Keybindings
+### 3. Connect
+
+Select a connection in the table and press `Enter` to open an interactive SSH terminal.
+
+### 4. File Transfer
+
+Press `f` on the dashboard or `Ctrl+F` inside the terminal to open the dual-pane file browser. The left pane shows local files, the right pane shows the remote filesystem via SFTP.
+
+- **Upload:** Select a file in the left pane and press `c`
+- **Download:** Select a file in the right pane and press `c` (saved to `~/Downloads`)
+- Switch between panes with `Tab`
+
+---
+
+## Keybindings
+
+### Dashboard
+
+| Key     | Action                          |
+|---------|---------------------------------|
+| `a`     | Add connection                  |
+| `e`     | Edit connection                 |
+| `d`     | Delete connection               |
+| `Enter` | Connect (SSH)                   |
+| `f`     | Open file transfer              |
+| `Tab`   | Switch focus (table / action bar) |
+| `q`     | Quit                            |
+
+### Terminal
+
+| Key      | Action              |
+|----------|---------------------|
+| `Ctrl+D` | Disconnect          |
+| `Ctrl+F` | Open file transfer  |
+
+### File Transfer
 
 | Key     | Action              |
 |---------|---------------------|
 | `c`     | Copy selected file  |
 | `Tab`   | Switch pane         |
 | `Esc`   | Go back             |
+
+---
 
 ## Configuration
 
@@ -66,19 +113,22 @@ All data is stored in `~/.config/ssh-term/config.json`:
 - Encryption salt
 - SSH connections (passwords encrypted with Fernet)
 
-## Architecture
+---
+
+## Project Structure
 
 ```
 src/ssh_term/
-├── app.py                    # Textual App + theme
-├── theme.py                  # Tokyo Night color scheme
+├── app.py                    # Textual App + global styles
+├── theme.py                  # Tokyo Night color constants
+├── styles/                   # TCSS stylesheets
 ├── models/
 │   ├── connection.py         # SSHConnection dataclass
 │   ├── config.py             # JSON config persistence
 │   └── auth.py               # bcrypt + Fernet encryption
 ├── screens/
 │   ├── auth_screen.py        # Master password login
-│   ├── dashboard.py          # Connection list
+│   ├── dashboard.py          # Connection list + action bar
 │   ├── connection_form.py    # Add/Edit modal
 │   ├── confirm_dialog.py     # Delete confirmation
 │   ├── terminal_screen.py    # SSH terminal
@@ -96,8 +146,11 @@ src/ssh_term/
 ## Dependencies
 
 - [textual](https://textual.textualize.io/) — TUI framework
-- [rich](https://rich.readthedocs.io/) — Terminal rendering
 - [paramiko](https://www.paramiko.org/) — SSH protocol
 - [pyte](https://pyte.readthedocs.io/) — Terminal emulation
 - [bcrypt](https://github.com/pyca/bcrypt) — Password hashing
 - [cryptography](https://cryptography.io/) — Fernet encryption
+
+## License
+
+MIT

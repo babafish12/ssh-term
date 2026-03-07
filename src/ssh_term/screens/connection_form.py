@@ -70,10 +70,8 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
                 yield Static(title, classes="form-title")
                 yield Static("Name", classes="form-label")
                 yield Input(value=c.name if c else "", placeholder="e.g. Prod Server", id="name")
-                yield Static("Host", classes="form-label")
-                yield Input(value=c.host if c else "", placeholder="e.g. web01.example.com", id="host")
-                yield Static("IP (optional)", classes="form-label")
-                yield Input(value=c.ip if c else "", placeholder="e.g. 192.168.1.50", id="ip")
+                yield Static("IP", classes="form-label")
+                yield Input(value=c.host if c else "", placeholder="e.g. 192.168.1.50", id="ip")
                 yield Static("Port", classes="form-label")
                 yield Input(value=str(c.port) if c else "22", placeholder="22", id="port")
                 yield Static("Username", classes="form-label")
@@ -116,7 +114,7 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
 
     def _do_save(self) -> None:
         name = self.query_one("#name", Input).value.strip()
-        host = self.query_one("#host", Input).value.strip()
+        ip = self.query_one("#ip", Input).value.strip()
         username = self.query_one("#username", Input).value.strip()
         port_str = self.query_one("#port", Input).value.strip()
         error = self.query_one("#form-error", Static)
@@ -124,8 +122,8 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         if not name:
             error.update("Name is required")
             return
-        if not host:
-            error.update("Host is required")
+        if not ip:
+            error.update("IP is required")
             return
         if not username:
             error.update("Username is required")
@@ -139,7 +137,6 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         auth_method = self.query_one("#auth_method", Select).value
         key_path = self.query_one("#key_path", Input).value.strip()
         password = self.query_one("#password", Input).value
-        ip = self.query_one("#ip", Input).value.strip()
         tags_raw = self.query_one("#tags", Input).value.strip()
         tags = [t.strip() for t in tags_raw.split(",") if t.strip()] if tags_raw else []
 
@@ -154,8 +151,7 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         if self.connection:
             conn = self.connection
             conn.name = name
-            conn.host = host
-            conn.ip = ip
+            conn.host = ip
             conn.port = port
             conn.username = username
             conn.auth_method = auth_method
@@ -166,8 +162,7 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         else:
             conn = SSHConnection(
                 name=name,
-                host=host,
-                ip=ip,
+                host=ip,
                 port=port,
                 username=username,
                 auth_method=auth_method,

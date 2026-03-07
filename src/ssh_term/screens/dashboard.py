@@ -4,14 +4,61 @@ from __future__ import annotations
 
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Static, Footer, Header
-from textual.containers import Vertical
+from textual.widgets import Static, Button
+from textual.containers import Vertical, Horizontal
 from textual.binding import Binding
+from textual import on
 
 from ssh_term import theme
 from ssh_term.widgets.connection_table import ConnectionTable
 from ssh_term.screens.connection_form import ConnectionFormModal
 from ssh_term.screens.confirm_dialog import ConfirmDialog
+
+
+class ActionBar(Horizontal):
+    """Navigable action bar with arrow-key support."""
+
+    DEFAULT_CSS = """
+    ActionBar {
+        dock: bottom;
+        height: 3;
+        background: """ + theme.SURFACE + """;
+        align: center middle;
+        padding: 0 1;
+    }
+    ActionBar Button {
+        margin: 0 1;
+        min-width: 16;
+    }
+    ActionBar Button:focus {
+        background: """ + theme.PRIMARY + """;
+        color: """ + theme.BG + """;
+        text-style: bold;
+    }
+    """
+
+    def compose(self) -> ComposeResult:
+        yield Button("Add [a]", id="act-add")
+        yield Button("Edit [e]", id="act-edit")
+        yield Button("Delete [d]", id="act-delete")
+        yield Button("Connect [⏎]", id="act-connect")
+        yield Button("Files [f]", id="act-files")
+        yield Button("Quit [q]", id="act-quit")
+
+    def on_key(self, event) -> None:
+        buttons = list(self.query(Button))
+        focused = self.screen.focused
+        if focused not in buttons:
+            return
+        idx = buttons.index(focused)
+        if event.key == "left" and idx > 0:
+            buttons[idx - 1].focus()
+            event.prevent_default()
+            event.stop()
+        elif event.key == "right" and idx < len(buttons) - 1:
+            buttons[idx + 1].focus()
+            event.prevent_default()
+            event.stop()
 
 
 class DashboardScreen(Screen):
@@ -30,35 +77,36 @@ class DashboardScreen(Screen):
     DashboardScreen #conn-table {
         margin: 1 2;
     }
-    DashboardScreen #status-line {
-        dock: bottom;
-        height: 1;
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.MUTED + """;
-        padding: 0 1;
-    }
     """
 
     BINDINGS = [
-        Binding("a", "add_connection", "Add"),
-        Binding("e", "edit_connection", "Edit"),
-        Binding("d", "delete_connection", "Delete"),
-        Binding("enter", "connect", "Connect"),
-        Binding("f", "file_transfer", "File Transfer"),
-        Binding("q", "quit", "Quit"),
+        Binding("a", "add_connection", "Add", show=False),
+        Binding("e", "edit_connection", "Edit", show=False),
+        Binding("d", "delete_connection", "Delete", show=False),
+        Binding("enter", "connect", "Connect", show=False),
+        Binding("f", "file_transfer", "File Transfer", show=False),
+        Binding("q", "quit", "Quit", show=False),
+        Binding("tab", "toggle_focus", "Switch Focus", show=False),
     ]
 
     def compose(self) -> ComposeResult:
         yield Static("SSH Terminal Manager", id="title-bar")
         with Vertical():
             yield ConnectionTable(id="conn-table")
-        yield Static(
-            " [a]dd  [e]dit  [d]elete  [Enter] connect  [f]ile transfer  [q]uit",
-            id="status-line",
-        )
+        yield ActionBar()
 
     def on_mount(self) -> None:
         self._refresh_table()
+        self.query_one("#conn-table", ConnectionTable).focus()
+
+    def action_toggle_focus(self) -> None:
+        table = self.query_one("#conn-table", ConnectionTable)
+        bar = self.query_one(ActionBar)
+        buttons = list(bar.query(Button))
+        if self.focused == table:
+            buttons[0].focus()
+        else:
+            table.focus()
 
     def _refresh_table(self) -> None:
         table = self.query_one("#conn-table", ConnectionTable)
@@ -70,6 +118,34 @@ class DashboardScreen(Screen):
             return None
         row_key, _ = table.coordinate_to_cell_key(table.cursor_coordinate)
         return str(row_key)
+
+    # --- Button handlers ---
+
+    @on(Button.Pressed, "#act-add")
+    def _btn_add(self) -> None:
+        self.action_add_connection()
+
+    @on(Button.Pressed, "#act-edit")
+    def _btn_edit(self) -> None:
+        self.action_edit_connection()
+
+    @on(Button.Pressed, "#act-delete")
+    def _btn_delete(self) -> None:
+        self.action_delete_connection()
+
+    @on(Button.Pressed, "#act-connect")
+    def _btn_connect(self) -> None:
+        self.action_connect()
+
+    @on(Button.Pressed, "#act-files")
+    def _btn_files(self) -> None:
+        self.action_file_transfer()
+
+    @on(Button.Pressed, "#act-quit")
+    def _btn_quit(self) -> None:
+        self.action_quit()
+
+    # --- Actions ---
 
     def action_add_connection(self) -> None:
         def on_result(conn) -> None:

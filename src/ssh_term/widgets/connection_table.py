@@ -21,7 +21,7 @@ class ConnectionTable(DataTable):
         self.zebra_stripes = True
 
     def on_mount(self) -> None:
-        self.add_columns("Name", "Host", "User", "Port", "Auth", "Tags", "Last Connected")
+        self.add_columns("Name", "IP", "User", "Port", "Auth", "Tags", "Last Connected")
 
     def load_connections(self, connections: list[SSHConnection]) -> None:
         self.clear()
