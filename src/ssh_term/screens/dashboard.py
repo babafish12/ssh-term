@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from textual.app import ComposeResult
 from textual.screen import Screen
-from textual.widgets import Static
+from textual.widgets import Static, DataTable
 from textual.binding import Binding
 
 from ssh_term import theme
@@ -57,12 +57,12 @@ class DashboardScreen(Screen):
     """
 
     BINDINGS = [
-        Binding("a", "add_connection", "Add", show=False),
-        Binding("e", "edit_connection", "Edit", show=False),
-        Binding("d", "delete_connection", "Delete", show=False),
-        Binding("enter", "connect", "Connect", show=False),
-        Binding("f", "file_transfer", "File Transfer", show=False),
-        Binding("q", "quit", "Quit", show=False),
+        Binding("a", "add_connection", "Add", show=False, priority=True),
+        Binding("e", "edit_connection", "Edit", show=False, priority=True),
+        Binding("d", "delete_connection", "Delete", show=False, priority=True),
+        Binding("enter", "connect", "Connect", show=False, priority=True),
+        Binding("f", "file_transfer", "File Transfer", show=False, priority=True),
+        Binding("q", "quit", "Quit", show=False, priority=True),
     ]
 
     def compose(self) -> ComposeResult:
@@ -73,6 +73,9 @@ class DashboardScreen(Screen):
     def on_mount(self) -> None:
         self._refresh_table()
         self.query_one("#conn-table", ConnectionTable).focus()
+
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        self.action_connect()
 
     def _refresh_table(self) -> None:
         table = self.query_one("#conn-table", ConnectionTable)
