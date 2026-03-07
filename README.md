@@ -33,6 +33,14 @@ pipx install .
 
 This installs `ssh-term` globally in an isolated environment. The `ssh-term` command will be available system-wide.
 
+### Updating
+
+```bash
+cd ssh-term
+git pull
+pipx install . --force
+```
+
 <details>
 <summary>Alternative: install in a virtual environment (for development)</summary>
 
@@ -75,7 +83,7 @@ Press `a` on the dashboard to add a new connection. The following fields are ava
 
 ### 3. Connect
 
-Select a connection in the table and press `Enter` to open an interactive SSH terminal.
+Navigate connections with arrow keys (`Up`/`Down`), then press `Enter` or click a row to connect. An interactive SSH terminal opens.
 
 ### 4. File Transfer
 
@@ -91,15 +99,16 @@ Press `f` on the dashboard or `Ctrl+F` inside the terminal to open the dual-pane
 
 ### Dashboard
 
-| Key     | Action                          |
-|---------|---------------------------------|
-| `a`     | Add connection                  |
-| `e`     | Edit connection                 |
-| `d`     | Delete connection               |
-| `Enter` | Connect (SSH)                   |
-| `f`     | Open file transfer              |
-| `Tab`   | Switch focus (table / action bar) |
-| `q`     | Quit                            |
+| Key        | Action                |
+|------------|-----------------------|
+| `Up/Down`  | Navigate connections  |
+| `a`        | Add connection        |
+| `e`        | Edit connection       |
+| `d`        | Delete connection     |
+| `Enter`    | Connect (SSH)         |
+| `f`        | Open file transfer    |
+| `q`        | Quit                  |
+| Mouse click | Select row / connect |
 
 ### Terminal
 
@@ -141,7 +150,7 @@ src/ssh_term/
 │   └── auth.py               # bcrypt + Fernet encryption
 ├── screens/
 │   ├── auth_screen.py        # Master password login
-│   ├── dashboard.py          # Connection list + action bar
+│   ├── dashboard.py          # Connection list + hint bar
 │   ├── connection_form.py    # Add/Edit modal
 │   ├── confirm_dialog.py     # Delete confirmation
 │   ├── terminal_screen.py    # SSH terminal
