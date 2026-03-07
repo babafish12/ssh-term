@@ -62,8 +62,8 @@ class TerminalEmulator(Static):
         self.channel = channel
         self._cols = 80
         self._rows = 24
-        self.screen = pyte.Screen(self._cols, self._rows)
-        self.stream = pyte.Stream(self.screen)
+        self._pyte_screen = pyte.Screen(self._cols, self._rows)
+        self.stream = pyte.Stream(self._pyte_screen)
         self._stop_event = threading.Event()
         self.can_focus = True
 
@@ -101,10 +101,10 @@ class TerminalEmulator(Static):
 
     def _render_screen(self) -> Text:
         text = Text()
-        cursor = self.screen.cursor
-        for y in range(self.screen.lines):
-            line = self.screen.buffer[y]
-            for x in range(self.screen.columns):
+        cursor = self._pyte_screen.cursor
+        for y in range(self._pyte_screen.lines):
+            line = self._pyte_screen.buffer[y]
+            for x in range(self._pyte_screen.columns):
                 char = line[x]
                 ch = char.data or " "
                 fg = _resolve_color(char.fg, theme.FG)
@@ -119,7 +119,7 @@ class TerminalEmulator(Static):
                 if y == cursor.y and x == cursor.x:
                     style = f"{bg} on {fg}"
                 text.append(ch, style=style)
-            if y < self.screen.lines - 1:
+            if y < self._pyte_screen.lines - 1:
                 text.append("\n")
         return text
 
@@ -179,7 +179,7 @@ class TerminalEmulator(Static):
         if cols != self._cols or rows != self._rows:
             self._cols = cols
             self._rows = rows
-            self.screen.resize(rows, cols)
+            self._pyte_screen.resize(rows, cols)
             try:
                 self.channel.resize_pty(width=cols, height=rows)
             except Exception:
