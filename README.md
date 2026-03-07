@@ -21,17 +21,30 @@ A minimalistic TUI application for managing and connecting to SSH servers, built
 ## Prerequisites
 
 - Python 3.11+
-- pip
+- [pipx](https://pipx.pypa.io/) (recommended) or pip
 
 ## Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/babafish12/ssh-term.git
+cd ssh-term
+pipx install .
+```
+
+This installs `ssh-term` globally in an isolated environment. The `ssh-term` command will be available system-wide.
+
+<details>
+<summary>Alternative: install in a virtual environment (for development)</summary>
+
+```bash
+git clone https://github.com/babafish12/ssh-term.git
 cd ssh-term
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
 ```
+
+</details>
 
 ---
 
