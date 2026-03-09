@@ -104,9 +104,9 @@ class FileTransferScreen(Screen):
         try:
             sftp = self.app.ssh_manager.open_sftp(self.connection.id)
             self._sftp_manager = SFTPManager(sftp)
-            self.call_from_thread(self._mount_remote_tree)
+            self.app.call_from_thread(self._mount_remote_tree)
         except Exception as e:
-            self.call_from_thread(self.notify, f"SFTP error: {e}", severity="error")
+            self.app.call_from_thread(self.notify, f"SFTP error: {e}", severity="error")
 
     def _mount_remote_tree(self) -> None:
         placeholder = self.query_one("#remote-placeholder", Static)
@@ -159,17 +159,17 @@ class FileTransferScreen(Screen):
     def _do_upload(self, local_path: str, remote_path: str) -> None:
         filename = os.path.basename(local_path)
         total = os.path.getsize(local_path)
-        self.call_from_thread(self._start_progress, filename, total)
+        self.app.call_from_thread(self._start_progress, filename, total)
 
         def callback(transferred, total_bytes):
-            self.call_from_thread(self._update_progress, transferred, total_bytes)
+            self.app.call_from_thread(self._update_progress, transferred, total_bytes)
 
         try:
             self._sftp_manager.upload(local_path, remote_path, callback=callback)
-            self.call_from_thread(self._finish_progress)
-            self.call_from_thread(self.notify, f"Uploaded {filename}")
+            self.app.call_from_thread(self._finish_progress)
+            self.app.call_from_thread(self.notify, f"Uploaded {filename}")
         except Exception as e:
-            self.call_from_thread(self.notify, f"Upload failed: {e}", severity="error")
+            self.app.call_from_thread(self.notify, f"Upload failed: {e}", severity="error")
 
     def _download_selected(self) -> None:
         remote_trees = self.query("RemoteFileTree")
@@ -190,17 +190,17 @@ class FileTransferScreen(Screen):
         filename = os.path.basename(remote_path)
         stat = self._sftp_manager.stat(remote_path)
         total = stat.st_size if stat and stat.st_size else 0
-        self.call_from_thread(self._start_progress, filename, total)
+        self.app.call_from_thread(self._start_progress, filename, total)
 
         def callback(transferred, total_bytes):
-            self.call_from_thread(self._update_progress, transferred, total_bytes)
+            self.app.call_from_thread(self._update_progress, transferred, total_bytes)
 
         try:
             self._sftp_manager.download(remote_path, local_path, callback=callback)
-            self.call_from_thread(self._finish_progress)
-            self.call_from_thread(self.notify, f"Downloaded to {local_path}")
+            self.app.call_from_thread(self._finish_progress)
+            self.app.call_from_thread(self.notify, f"Downloaded to {local_path}")
         except Exception as e:
-            self.call_from_thread(self.notify, f"Download failed: {e}", severity="error")
+            self.app.call_from_thread(self.notify, f"Download failed: {e}", severity="error")
 
     def _start_progress(self, filename: str, total: int) -> None:
         progress = self.query_one("#transfer-progress", TransferProgress)

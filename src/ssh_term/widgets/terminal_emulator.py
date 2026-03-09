@@ -79,14 +79,14 @@ class TerminalEmulator(Static):
                     if not data:
                         break
                     self.stream.feed(data.decode("utf-8", errors="replace"))
-                    self.call_from_thread(self._refresh_content)
+                    self.app.call_from_thread(self._refresh_content)
                 elif self.channel.exit_status_ready():
                     break
                 else:
                     self._stop_event.wait(0.02)
             except Exception:
                 break
-        self.call_from_thread(self._on_disconnect)
+        self.app.call_from_thread(self._on_disconnect)
 
     def _on_disconnect(self) -> None:
         from textual.message import Message
