@@ -8,9 +8,6 @@ from textual.widgets import Static, Input, Button
 from textual.containers import Vertical, Center
 from textual import on
 
-from ssh_term import theme
-
-
 class AuthScreen(ModalScreen[bool]):
     CSS = """
     AuthScreen {
@@ -21,25 +18,25 @@ class AuthScreen(ModalScreen[bool]):
         height: auto;
         max-height: 22;
         border: thick $primary;
-        background: """ + theme.SURFACE + """;
+        background: $surface;
         padding: 1 2;
     }
     AuthScreen .auth-title {
         text-align: center;
         text-style: bold;
-        color: """ + theme.PRIMARY + """;
+        color: $primary;
         margin-bottom: 1;
     }
     AuthScreen .auth-subtitle {
         text-align: center;
-        color: """ + theme.MUTED + """;
+        color: $text-muted;
         margin-bottom: 1;
     }
     AuthScreen Input {
         margin-bottom: 1;
     }
     AuthScreen .auth-error {
-        color: """ + theme.ERROR + """;
+        color: $error;
         text-align: center;
         margin-bottom: 1;
     }

@@ -5,7 +5,6 @@ from __future__ import annotations
 from textual.widgets import DataTable
 
 from ssh_term.models.connection import SSHConnection
-from ssh_term import theme
 
 
 class ConnectionTable(DataTable):

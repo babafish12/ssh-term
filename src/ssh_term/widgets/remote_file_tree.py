@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from rich.text import Text
 from textual.widgets import Tree
 from textual.widgets._tree import TreeNode
 
@@ -41,11 +42,16 @@ class RemoteFileTree(Tree):
             if entry.name.startswith("."):
                 continue
             if entry.is_dir:
-                child = node.add(f"\U0001f4c1 {entry.name}", data=entry.path)
+                label = Text(entry.name, style="bold")
+                child = node.add(label, data=entry.path)
                 child.add_leaf("...", data=None)
             else:
                 size = self._format_size(entry.size)
-                node.add_leaf(f"\U0001f4c4 {entry.name}  ({size})", data=entry.path)
+                label = Text.assemble(
+                    (entry.name, ""),
+                    (f"  ({size})", "dim"),
+                )
+                node.add_leaf(label, data=entry.path)
 
     @staticmethod
     def _format_size(size: int) -> str:

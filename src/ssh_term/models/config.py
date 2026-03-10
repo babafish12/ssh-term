@@ -17,6 +17,7 @@ def _default_config() -> dict:
         "version": 1,
         "master_password_hash": "",
         "salt": "",
+        "theme": "tokyo-night",
         "connections": [],
     }
 
@@ -97,3 +98,11 @@ class ConfigManager:
             if c.id == conn_id:
                 return c
         return None
+
+    @property
+    def theme(self) -> str:
+        return self._data.get("theme", "tokyo-night")
+
+    @theme.setter
+    def theme(self, value: str) -> None:
+        self._data["theme"] = value

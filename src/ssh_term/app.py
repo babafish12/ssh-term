@@ -9,82 +9,98 @@ from ssh_term.models.config import ConfigManager
 from ssh_term.services.ssh_manager import SSHManager
 from ssh_term.screens.auth_screen import AuthScreen
 from ssh_term.screens.dashboard import DashboardScreen
-from ssh_term import theme
+from ssh_term.theme import THEMES
 
 
 class SSHTermApp(App):
     CSS = """
     Screen {
-        background: """ + theme.BG + """;
-        color: """ + theme.FG + """;
+        background: $background;
+        color: $foreground;
     }
     DataTable {
-        background: """ + theme.BG + """;
-        color: """ + theme.FG + """;
+        background: $background;
+        color: $foreground;
     }
     DataTable > .datatable--header {
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.PRIMARY + """;
+        background: $surface;
+        color: $primary;
         text-style: bold;
     }
     DataTable > .datatable--cursor {
-        background: """ + theme.BG_HIGHLIGHT + """;
-        color: """ + theme.FG + """;
+        background: $panel;
+        color: $foreground;
     }
     DataTable > .datatable--even-row {
-        background: """ + theme.BG + """;
+        background: $background;
     }
     DataTable > .datatable--odd-row {
-        background: """ + theme.SURFACE + """;
+        background: $surface;
     }
     Input {
-        background: """ + theme.BG_HIGHLIGHT + """;
-        color: """ + theme.FG + """;
-        border: tall """ + theme.BORDER + """;
+        background: $panel;
+        color: $foreground;
+        border: tall $panel;
     }
     Input:focus {
-        border: tall """ + theme.PRIMARY + """;
+        border: tall $primary;
     }
     Button {
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.FG + """;
-        border: tall """ + theme.BORDER + """;
+        background: $surface;
+        color: $foreground;
+        border: tall $panel;
     }
     Button:hover {
-        background: """ + theme.BG_HIGHLIGHT + """;
+        background: $panel;
     }
     Button.-primary {
-        background: """ + theme.PRIMARY + """;
-        color: """ + theme.BG + """;
+        background: $primary;
+        color: $background;
     }
     Button.-error {
-        background: """ + theme.ERROR + """;
-        color: """ + theme.BG + """;
+        background: $error;
+        color: $background;
     }
     Select {
-        background: """ + theme.BG_HIGHLIGHT + """;
-        color: """ + theme.FG + """;
-        border: tall """ + theme.BORDER + """;
+        background: $panel;
+        color: $foreground;
+        border: tall $panel;
     }
     ProgressBar Bar {
-        color: """ + theme.PRIMARY + """;
-        background: """ + theme.SURFACE + """;
+        color: $primary;
+        background: $surface;
     }
     Tree {
-        background: """ + theme.BG + """;
-        color: """ + theme.FG + """;
+        background: $background;
+        color: $foreground;
     }
     Tree > .tree--cursor {
-        background: """ + theme.BG_HIGHLIGHT + """;
-        color: """ + theme.FG + """;
+        background: $primary;
+        color: $background;
+        text-style: bold;
+    }
+    Tree:focus > .tree--cursor {
+        background: $primary;
+        color: $background;
+        text-style: bold;
     }
     DirectoryTree {
-        background: """ + theme.BG + """;
-        color: """ + theme.FG + """;
+        background: $background;
+        color: $foreground;
+    }
+    DirectoryTree > .tree--cursor {
+        background: $primary;
+        color: $background;
+        text-style: bold;
+    }
+    DirectoryTree:focus > .tree--cursor {
+        background: $primary;
+        color: $background;
+        text-style: bold;
     }
     Toast {
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.FG + """;
+        background: $surface;
+        color: $foreground;
     }
     """
 
@@ -98,6 +114,10 @@ class SSHTermApp(App):
 
     def on_mount(self) -> None:
         self.config_manager.load()
+
+        for t in THEMES:
+            self.register_theme(t)
+        self.theme = self.config_manager.theme
 
         def on_auth(result: bool) -> None:
             if result:

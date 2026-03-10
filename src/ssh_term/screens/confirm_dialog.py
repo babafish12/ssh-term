@@ -8,8 +8,6 @@ from textual.widgets import Static, Button
 from textual.containers import Vertical, Horizontal, Center
 from textual import on
 
-from ssh_term import theme
-
 
 class ConfirmDialog(ModalScreen[bool]):
     CSS = """
@@ -20,18 +18,18 @@ class ConfirmDialog(ModalScreen[bool]):
         width: 45;
         height: auto;
         border: thick $error;
-        background: """ + theme.SURFACE + """;
+        background: $surface;
         padding: 1 2;
     }
     ConfirmDialog .confirm-title {
         text-align: center;
         text-style: bold;
-        color: """ + theme.ERROR + """;
+        color: $error;
         margin-bottom: 1;
     }
     ConfirmDialog .confirm-msg {
         text-align: center;
-        color: """ + theme.FG + """;
+        color: $foreground;
         margin-bottom: 1;
     }
     ConfirmDialog Horizontal {

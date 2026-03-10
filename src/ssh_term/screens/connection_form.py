@@ -8,7 +8,6 @@ from textual.widgets import Static, Input, Button, Select
 from textual.containers import Vertical, Horizontal, Center
 from textual import on
 
-from ssh_term import theme
 from ssh_term.models.connection import SSHConnection
 
 
@@ -22,19 +21,19 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         height: auto;
         max-height: 35;
         border: thick $primary;
-        background: """ + theme.SURFACE + """;
+        background: $surface;
         padding: 1 2;
         overflow-y: auto;
     }
     ConnectionFormModal .form-title {
         text-align: center;
         text-style: bold;
-        color: """ + theme.PRIMARY + """;
+        color: $primary;
         margin-bottom: 1;
     }
     ConnectionFormModal .form-label {
         margin-top: 1;
-        color: """ + theme.FG_DIM + """;
+        color: $text-muted;
     }
     ConnectionFormModal Input {
         margin-bottom: 0;
@@ -43,7 +42,7 @@ class ConnectionFormModal(ModalScreen[SSHConnection | None]):
         margin-bottom: 0;
     }
     ConnectionFormModal .form-error {
-        color: """ + theme.ERROR + """;
+        color: $error;
         text-align: center;
         margin-top: 1;
     }

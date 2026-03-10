@@ -11,26 +11,26 @@ from textual import work
 from textual.widgets import Static
 from textual.events import Key, Resize
 
-from ssh_term import theme
+from ssh_term.theme import TERMINAL_FG, TERMINAL_BG, TERMINAL_ANSI
 
 
 _PYTE_COLOR_MAP = {
-    "black": theme.ANSI_COLORS[0],
-    "red": theme.ANSI_COLORS[1],
-    "green": theme.ANSI_COLORS[2],
-    "brown": theme.ANSI_COLORS[3],
-    "blue": theme.ANSI_COLORS[4],
-    "magenta": theme.ANSI_COLORS[5],
-    "cyan": theme.ANSI_COLORS[6],
-    "white": theme.ANSI_COLORS[7],
-    "brightblack": theme.ANSI_COLORS[8],
-    "brightred": theme.ANSI_COLORS[9],
-    "brightgreen": theme.ANSI_COLORS[10],
-    "brightyellow": theme.ANSI_COLORS[11],
-    "brightblue": theme.ANSI_COLORS[12],
-    "brightmagenta": theme.ANSI_COLORS[13],
-    "brightcyan": theme.ANSI_COLORS[14],
-    "brightwhite": theme.ANSI_COLORS[15],
+    "black": TERMINAL_ANSI[0],
+    "red": TERMINAL_ANSI[1],
+    "green": TERMINAL_ANSI[2],
+    "brown": TERMINAL_ANSI[3],
+    "blue": TERMINAL_ANSI[4],
+    "magenta": TERMINAL_ANSI[5],
+    "cyan": TERMINAL_ANSI[6],
+    "white": TERMINAL_ANSI[7],
+    "brightblack": TERMINAL_ANSI[8],
+    "brightred": TERMINAL_ANSI[9],
+    "brightgreen": TERMINAL_ANSI[10],
+    "brightyellow": TERMINAL_ANSI[11],
+    "brightblue": TERMINAL_ANSI[12],
+    "brightmagenta": TERMINAL_ANSI[13],
+    "brightcyan": TERMINAL_ANSI[14],
+    "brightwhite": TERMINAL_ANSI[15],
 }
 
 
@@ -54,6 +54,7 @@ class TerminalEmulator(Static):
         width: 1fr;
         height: 1fr;
         overflow: hidden;
+        background: """ + TERMINAL_BG + """;
     }
     """
 
@@ -107,8 +108,8 @@ class TerminalEmulator(Static):
             for x in range(self._pyte_screen.columns):
                 char = line[x]
                 ch = char.data or " "
-                fg = _resolve_color(char.fg, theme.FG)
-                bg = _resolve_color(char.bg, theme.BG)
+                fg = _resolve_color(char.fg, TERMINAL_FG)
+                bg = _resolve_color(char.bg, TERMINAL_BG)
                 style = f"{fg} on {bg}"
                 if char.bold:
                     style += " bold"

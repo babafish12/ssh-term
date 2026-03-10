@@ -7,7 +7,7 @@ from textual.screen import Screen
 from textual.widgets import Static
 from textual.binding import Binding
 
-from ssh_term import theme
+from ssh_term.theme import get_color, TERMINAL_BG
 from ssh_term.models.connection import SSHConnection
 from ssh_term.widgets.terminal_emulator import TerminalEmulator
 
@@ -15,13 +15,13 @@ from ssh_term.widgets.terminal_emulator import TerminalEmulator
 class TerminalScreen(Screen):
     CSS = """
     TerminalScreen {
-        background: """ + theme.BG + """;
+        background: """ + TERMINAL_BG + """;
     }
     TerminalScreen #term-status {
         dock: bottom;
         height: 1;
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.MUTED + """;
+        background: $surface;
+        color: $text-muted;
         padding: 0 1;
     }
     """
@@ -38,13 +38,16 @@ class TerminalScreen(Screen):
     def compose(self) -> ComposeResult:
         channel = self.app.ssh_manager.open_shell(self.connection.id)
         yield TerminalEmulator(channel, id="terminal")
-        yield Static(
-            f" {self.connection.name} ({self.connection.host})  |  Ctrl+D disconnect  Ctrl+F files",
-            id="term-status",
-        )
+        yield Static("", id="term-status")
 
     def on_mount(self) -> None:
         self.query_one("#terminal").focus()
+        err = get_color(self.app.theme, "error")
+        self.query_one("#term-status", Static).update(
+            f" {self.connection.name} ({self.connection.host})  |  "
+            f"[bold {err}]Ctrl+D[/] disconnect  "
+            f"[bold {err}]Ctrl+F[/] files"
+        )
 
     def on_terminal_emulator_disconnected(self, _event) -> None:
         self.app.ssh_manager.disconnect(self.connection.id)

@@ -75,6 +75,44 @@ class SFTPManager:
         except IOError:
             return None
 
+    def upload_recursive(
+        self,
+        local_dir: str,
+        remote_dir: str,
+        callback: callable | None = None,
+    ) -> int:
+        """Upload a directory recursively. Returns number of files transferred."""
+        count = 0
+        for dirpath, dirnames, filenames in os.walk(local_dir):
+            rel = os.path.relpath(dirpath, local_dir)
+            remote_sub = remote_dir if rel == "." else remote_dir.rstrip("/") + "/" + rel.replace(os.sep, "/")
+            self.mkdir(remote_sub)
+            for fname in filenames:
+                local_file = os.path.join(dirpath, fname)
+                remote_file = remote_sub.rstrip("/") + "/" + fname
+                self.sftp.put(local_file, remote_file, callback=callback)
+                count += 1
+        return count
+
+    def download_recursive(
+        self,
+        remote_dir: str,
+        local_dir: str,
+        callback: callable | None = None,
+    ) -> int:
+        """Download a directory recursively. Returns number of files transferred."""
+        count = 0
+        Path(local_dir).mkdir(parents=True, exist_ok=True)
+        for entry in self.listdir(remote_dir):
+            if entry.is_dir:
+                sub_local = os.path.join(local_dir, entry.name)
+                count += self.download_recursive(entry.path, sub_local, callback=callback)
+            else:
+                local_file = os.path.join(local_dir, entry.name)
+                self.sftp.get(entry.path, local_file, callback=callback)
+                count += 1
+        return count
+
     def cwd(self) -> str:
         return self.sftp.normalize(".")
 

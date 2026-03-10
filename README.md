@@ -13,7 +13,7 @@ A minimalistic TUI application for managing and connecting to SSH servers, built
 - **Interactive Terminal** — Full-screen SSH terminal emulation powered by [pyte](https://pyte.readthedocs.io/) with xterm-256color support, cursor rendering, and automatic terminal resizing
 - **Dual-Pane File Transfer** — Side-by-side local and remote filesystem browser via SFTP with progress bar for uploads and downloads
 - **Encrypted Password Storage** — Master password hashed with bcrypt (480k iterations). SSH passwords encrypted with Fernet, using a PBKDF2-derived key (SHA-256, 480k iterations) from the master password
-- **Tokyo Night Theme** — Dark color scheme inspired by the [Tokyo Night](https://github.com/enkia/tokyo-night-vscode-theme) palette
+- **Multiple Themes** — Six built-in dark color schemes for the UI, switchable with `T` on the dashboard. The terminal emulator always uses a fixed Tokyo Night background for consistent rendering. Theme choice is saved to config
 - **Multiple Auth Methods** — SSH key, password, or SSH agent authentication
 - **Lazy-Loading Remote Tree** — Remote directories are only fetched when expanded, keeping the UI responsive on large filesystems
 - **Persistent Configuration** — All connections stored in a single JSON file, easy to back up or migrate
@@ -119,6 +119,27 @@ Press `f` on the dashboard (connects automatically if needed) or `Ctrl+F` inside
 
 ---
 
+## Themes
+
+The UI supports six built-in dark color schemes. Press `T` (Shift+T) on the dashboard to cycle through themes. The selected theme is saved to the config file and restored on next launch.
+
+All UI elements (dashboard, forms, dialogs, status bars, file transfer) adapt to the selected theme. The **terminal emulator** always uses a fixed Tokyo Night background and ANSI color palette, regardless of the UI theme. This ensures consistent rendering of terminal output across all themes.
+
+### Available Themes
+
+| Theme              | Primary    | Background |
+|--------------------|------------|------------|
+| **Tokyo Night**    | `#7aa2f7`  | `#1a1b26`  |
+| **Catppuccin Mocha** | `#89b4fa` | `#1e1e2e`  |
+| **Dracula**        | `#bd93f9`  | `#282a36`  |
+| **Nord**           | `#88c0d0`  | `#2e3440`  |
+| **Gruvbox Dark**   | `#83a598`  | `#282828`  |
+| **One Dark**       | `#61afef`  | `#282c34`  |
+
+Each theme includes a complete color set (primary, secondary, accent, warning, error, success) and a matching 16-color ANSI palette for the terminal emulator.
+
+---
+
 ## Keybindings
 
 ### Dashboard
@@ -131,6 +152,7 @@ Press `f` on the dashboard (connects automatically if needed) or `Ctrl+F` inside
 | `d`           | Delete selected connection (with confirmation dialog) |
 | `Enter`       | Connect to selected server via SSH |
 | `f`           | Open file transfer for selected server |
+| `T`           | Cycle to next theme (saved to config)  |
 | `q`           | Quit the application               |
 | Mouse click   | Select row / double-click to connect |
 
@@ -148,6 +170,8 @@ Press `f` on the dashboard (connects automatically if needed) or `Ctrl+F` inside
 |---------|-------------------------------------------------|
 | `c`     | Copy selected file (upload or download depending on active pane) |
 | `Tab`   | Switch between local and remote pane            |
+| `x`     | Collapse all expanded directories in active pane |
+| `t`     | Switch to terminal (closes file transfer)       |
 | `Esc`   | Close file transfer and go back                 |
 
 ---
@@ -167,7 +191,9 @@ App Start
                     │                           ├─ Ctrl+D ──> back to Dashboard
                     │                           └─ Ctrl+F ──> File Transfer
                     ├─ [f] File Transfer ──> File Transfer Screen
-                    │                           └─ Esc ─────> back to Dashboard
+                    │                           ├─ Esc ─────> back to Dashboard
+                    │                           └─ t ───────> Terminal Screen
+                    ├─ [T] Cycle Theme
                     └─ [q] Quit
 ```
 
@@ -188,6 +214,7 @@ The directory is created automatically on first run. Example structure:
   "version": 1,
   "master_password_hash": "$2b$12$...",
   "salt": "base64-encoded-16-byte-salt",
+  "theme": "tokyo-night",
   "connections": [
     {
       "id": "uuid-v4",
@@ -230,7 +257,7 @@ src/ssh_term/
 ├── __init__.py
 ├── __main__.py               # Entry point (ssh-term command)
 ├── app.py                    # Textual App, global CSS, screen flow
-├── theme.py                  # Tokyo Night color constants + ANSI mapping
+├── theme.py                  # Theme definitions, ANSI color maps, fixed terminal colors
 ├── models/
 │   ├── connection.py         # SSHConnection dataclass + JSON serialization
 │   ├── config.py             # ConfigManager — JSON read/write at ~/.config/ssh-term/
@@ -245,7 +272,8 @@ src/ssh_term/
 ├── widgets/
 │   ├── terminal_emulator.py  # pyte Screen + paramiko Channel → Rich Text rendering
 │   ├── connection_table.py   # Styled DataTable with row cursor + zebra stripes
-│   ├── remote_file_tree.py   # Lazy-loading SFTP directory tree
+│   ├── local_file_tree.py    # Local DirectoryTree with non-emoji icons
+│   ├── remote_file_tree.py   # Lazy-loading SFTP directory tree with Rich Text labels
 │   └── transfer_progress.py  # File transfer progress bar widget
 ├── services/
 │   ├── ssh_manager.py        # SSH connection lifecycle (connect/shell/sftp/disconnect)
@@ -291,6 +319,30 @@ Make sure your terminal emulator supports 256 colors. The SSH session uses `xter
 ### Forgot master password
 
 There is no password recovery. Delete `~/.config/ssh-term/config.json` and start fresh. All saved connections and encrypted passwords will be lost.
+
+---
+
+## Changelog
+
+### v0.2.0 — 2026-03-10
+
+- Added six built-in dark themes: Tokyo Night, Catppuccin Mocha, Dracula, Nord, Gruvbox Dark, One Dark
+- Theme switching with `T` on the dashboard, cycles through all themes silently (no notification toast)
+- Selected theme is persisted in config and restored on next launch
+- UI elements (dashboard, forms, dialogs, status bars, file transfer) adapt to the selected theme via Textual CSS variables
+- Terminal emulator uses a fixed Tokyo Night background and ANSI palette regardless of UI theme for consistent rendering
+- Replaced emoji folder/file icons (📁📂📄) with standard Unicode symbols (▶/▼) for reliable rendering across all terminal fonts
+- Remote file tree uses Rich Text styled labels (bold folders, dim file sizes)
+- Added `x` (collapse all) and `t` (switch to terminal) keybindings in file transfer screen
+
+### v0.1.0 — 2026-03-08
+
+- Initial release
+- SSH connection management (add, edit, delete)
+- Full-screen terminal emulation with pyte + paramiko
+- Dual-pane SFTP file transfer with progress bar
+- Master password authentication with bcrypt + Fernet encryption
+- Tokyo Night color scheme
 
 ---
 

@@ -7,7 +7,7 @@ from textual.screen import Screen
 from textual.widgets import Static, DataTable
 from textual.binding import Binding
 
-from ssh_term import theme
+from ssh_term.theme import get_color, next_theme
 from ssh_term.widgets.connection_table import ConnectionTable
 from ssh_term.screens.connection_form import ConnectionFormModal
 from ssh_term.screens.confirm_dialog import ConfirmDialog
@@ -20,36 +20,40 @@ class HintBar(Static):
     HintBar {
         dock: bottom;
         height: 1;
-        background: """ + theme.SURFACE + """;
-        color: """ + theme.MUTED + """;
+        background: $surface;
+        color: $text-muted;
         padding: 0 1;
     }
     """
 
-    def __init__(self) -> None:
-        hints = (
-            "[bold " + theme.PRIMARY + "]a[/] Add  "
-            "[bold " + theme.PRIMARY + "]e[/] Edit  "
-            "[bold " + theme.PRIMARY + "]d[/] Delete  "
-            "[bold " + theme.PRIMARY + "]\u23ce[/] Connect  "
-            "[bold " + theme.PRIMARY + "]f[/] Files  "
-            "[bold " + theme.PRIMARY + "]q[/] Quit"
+    def on_mount(self) -> None:
+        self.refresh_hints()
+
+    def refresh_hints(self) -> None:
+        err = get_color(self.app.theme, "error")
+        self.update(
+            f"[bold {err}]a[/] Add  "
+            f"[bold {err}]e[/] Edit  "
+            f"[bold {err}]d[/] Delete  "
+            f"[bold {err}]\u23ce[/] Connect  "
+            f"[bold {err}]f[/] Files  "
+            f"[bold {err}]T[/] Theme  "
+            f"[bold {err}]q[/] Quit"
         )
-        super().__init__(hints)
 
 
 class DashboardScreen(Screen):
     CSS = """
     DashboardScreen {
-        background: """ + theme.BG + """;
+        background: $background;
     }
     DashboardScreen #title-bar {
         height: 3;
         content-align: center middle;
         text-style: bold;
-        color: """ + theme.PRIMARY + """;
-        background: """ + theme.SURFACE + """;
-        border-bottom: solid """ + theme.BORDER + """;
+        color: $primary;
+        background: $surface;
+        border-bottom: solid $panel;
     }
     DashboardScreen #conn-table {
         margin: 1 2;
@@ -62,6 +66,7 @@ class DashboardScreen(Screen):
         Binding("d", "delete_connection", "Delete", show=False, priority=True),
         Binding("enter", "connect", "Connect", show=False, priority=True),
         Binding("f", "file_transfer", "File Transfer", show=False, priority=True),
+        Binding("T", "cycle_theme", "Theme", show=False, priority=True),
         Binding("q", "quit", "Quit", show=False, priority=True),
     ]
 
@@ -192,6 +197,13 @@ class DashboardScreen(Screen):
 
         from ssh_term.screens.file_transfer import FileTransferScreen
         self.app.push_screen(FileTransferScreen(conn))
+
+    def action_cycle_theme(self) -> None:
+        new = next_theme(self.app.theme)
+        self.app.theme = new
+        self.app.config_manager.theme = new
+        self.app.config_manager.save()
+        self.query_one(HintBar).refresh_hints()
 
     def action_quit(self) -> None:
         self.app.exit()
